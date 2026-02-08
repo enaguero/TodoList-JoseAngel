@@ -1,7 +1,6 @@
-import React from "react";
-import { useState } from 'react';
+import React, { useState } from 'react';
 
-// ✅ Se consolidó los imports de React en una sola línea
+// ✅ Imports consolidados: React y useState en una sola línea (mejor práctica)
 // ✅ Se eliminó useEffect ya que no se estaba usando
 
 function MiTodoList() {
@@ -61,6 +60,15 @@ function MiTodoList() {
     setErrores('');
   };
 
+  // 🎯 Nueva función extraída: Actualiza el texto mientras se está editando
+  // Esto mantiene el JSX limpio y facilita el testing
+  const handleEditChange = (indiceObjetivo, nuevoValor) => {
+    const nuevaLista = tareas.map((t, i) => 
+      i === indiceObjetivo ? { ...t, texto: nuevoValor } : t
+    );
+    setTareas(nuevaLista);
+  };
+
   // 🔧 Se simplificó la validación - ya se hace dentro de agregarTarea()
 
   return (
@@ -96,13 +104,7 @@ function MiTodoList() {
               <input
                 type="text"
                 value={tarea.texto}
-                onChange={(e) => {
-                  // Actualizamos el texto mientras se edita
-                  const nuevaLista = tareas.map((t, i) => 
-                    i === index ? { ...t, texto: e.target.value } : t
-                  );
-                  setTareas(nuevaLista);
-                }}
+                onChange={(e) => handleEditChange(index, e.target.value)}
                 onKeyPress={(e) => {
                   // Al presionar Enter, guardamos la edición
                   if (e.key === 'Enter') {
