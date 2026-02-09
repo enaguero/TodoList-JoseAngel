@@ -1,25 +1,35 @@
 import React from "react";
-
-import { useState, useEffect } from 'react';
+// ⚠️ OPORTUNIDAD DE MEJORA: useEffect importado pero no usado
+// Sugerencia: Eliminar imports no utilizados para mantener código limpio
+import { useState } from 'react';
 
 function MiTodoList() {
   const [tareas, setTareas] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [errores, setErrores] = useState('');
 
+  // ✅ PATRÓN POSITIVO: Uso correcto del spread operator
+  // Esta función crea un NUEVO array en lugar de mutar el existente
   function agregarTarea() {
     setTareas([...tareas, {texto: inputValue, completada:false, isEditing:false}])
     setInputValue("")
-  } 
+  }
 
+  // ✅ PATRÓN POSITIVO: Uso correcto de .filter() para inmutabilidad
+  // .filter() crea un NUEVO array sin el elemento, no muta el original
   const eliminarTarea = (indiceObjetivo) => {
     const nuevaLista = tareas.filter((_, indexActual)=> indexActual !== indiceObjetivo);
     setTareas(nuevaLista);
   }
+  // ❌ ANTI-PATRÓN CRÍTICO: Mutación directa del estado (ver línea 22 del código original)
+  // El código original hacía: tarea.completada=!tarea.completada
+  // Esto modifica el objeto directamente, rompiendo inmutabilidad de React
   const completarTarea = (indiceObjetivo) => {
+    // ✅ CORRECCIÓN APLICADA: Usar spread operator para crear nuevo objeto
     const nuevaClase = tareas.map((tarea, index) => {
       if (index === indiceObjetivo){
-        tarea.completada=!tarea.completada
+        // Crear NUEVO objeto en lugar de mutar el existente
+        return { ...tarea, completada: !tarea.completada }
       }
       return tarea
     })
@@ -28,12 +38,20 @@ function MiTodoList() {
   const EditarTarea = (id, nuevoTexto) =>{
      
   }
+  // ⚠️ OPORTUNIDAD DE MEJORA: Validación sin .trim()
+  // El código original permitía agregar tareas con solo espacios
   const validarTarea = () => {
-    if (inputValue === "") {
-      setErrores("error")
+    // ✅ MEJORA APLICADA: Usar .trim() para detectar espacios en blanco
+    if (inputValue.trim() === "") {
+      // ✅ MEJORA: Mensaje de error más descriptivo
+      setErrores("La tarea no puede estar vacía")
       return false
     }
-    else agregarTarea() , setErrores("")
+    // ✅ MEJORA: Sintaxis más clara con llaves
+    else {
+      agregarTarea();
+      setErrores("");
+    }
   }
 
   // ❓ TODO: Implementar funciones:
@@ -45,9 +63,12 @@ function MiTodoList() {
       
       {/* Formulario */}
       <div className="formulario">
+        {/* ✅ PATRÓN POSITIVO: Input controlado con value y onChange */}
         <input
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
+          // 💡 SUGERENCIA: Agregar onKeyDown para mejorar UX
+          // onKeyDown={(e) => e.key === 'Enter' && validarTarea()}
           placeholder="Nueva tarea..."
         />
         <button onClick={() => {validarTarea()}}>
